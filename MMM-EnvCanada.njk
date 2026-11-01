@@ -1,19 +1,35 @@
-<div>{{mytext | safe}}</div>
-{% if marine != "" %}
-	<div class="marinepad">{{marine | safe}}</div>
+{% if not loaded %}
+	<div>
+		{% if hasError %}
+			{{ labels.WEATHER_UNAVAILABLE }}
+		{% else %}
+			{{ labels.LOADING }}
+		{% endif %}
+	</div>
+{% else %}
+	<div>
+		{% for alert in alerts %}<b>{{ alert }}</b>. {% endfor %}
+		{% for period in forecasts %}<b>{{ period.name }}:</b> {{ period.summary }} {% endfor %}
+	</div>
+{% endif %}
+{% if marine.warnings.length or marine.winds.length %}
+	<div class="marinepad"><b>{{ labels.MARINE_FORECAST }}:</b>
+		{% for warning in marine.warnings %}<b>{{ warning }}.</b> {% endfor %}
+		{% for wind in marine.winds %}{{ wind }} {% endfor %}
+	</div>
 {% endif %}
 {% if airquality != ""  %}
-	<div class="marinepad"><b>{{airquality}} - {{labels.AIR_QUALITY_INDEX}}:</b> <span class="{{airQIStat}}-aqi">{{airQI}}</span> {{labels.AIR_QUALITY_FORECAST}}: <span class="{{airQIFStat}}-aqi">{{airQIF}}</span></div>
+	<div class="marinepad"><b>{{airquality}} - {{ labels.AIR_QUALITY_INDEX }}:</b> <span class="{{airQIStat}}-aqi">{{airQI}}</span> {{ labels.AIR_QUALITY_FORECAST }}: <span class="{{airQIFStat}}-aqi">{{airQIF}}</span></div>
 {% endif %}
 {% if forecastDays > 2 %}
 	<table class="forecastable">
 		<tr>
 			<td> </td>
-			<td><i>{{labels.DAY}}</i></td>
-			<td><i>{{labels.HIGH}}</i></td>
+			<td><i>{{ labels.DAY }}</i></td>
+			<td><i>{{ labels.HIGH }}</i></td>
 			<td> </td>
-			<td><i>{{labels.NIGHT}}</i></td>
-			<td><i>{{labels.LOW}}</i></td>
+			<td><i>{{ labels.NIGHT }}</i></td>
+			<td><i>{{ labels.LOW }}</i></td>
 			<td> </td>
 		</tr>
 		{% set forecast = forecast.slice(0, forecastDays) %}

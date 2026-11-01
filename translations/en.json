@@ -1,5 +1,6 @@
 {
-  "STARTING": "Starting ...",
+  "LOADING": "Loading...",
+  "WEATHER_UNAVAILABLE": "Weather unavailable",
   "FORECAST_FOR": "Forecast for",
   "MARINE_FORECAST": "Marine Forecast",
   "AIR_QUALITY_INDEX": "Air Quality Index",

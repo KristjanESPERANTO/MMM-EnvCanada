@@ -1,5 +1,6 @@
 {
-  "STARTING": "Chargement...",
+  "LOADING": "Chargement...",
+  "WEATHER_UNAVAILABLE": "Météo indisponible",
   "FORECAST_FOR": "Prévisions pour",
   "MARINE_FORECAST": "Météo maritime",
   "AIR_QUALITY_INDEX": "Cote air santé",

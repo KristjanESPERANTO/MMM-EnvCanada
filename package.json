@@ -5,6 +5,12 @@
   "displayName": "MMM-EnvCanada",
   "description": "MagicMirror² Module to display weather forecast information from Environment Canada. ",
   "main": "MMM-EnvCanada.js",
+  "scripts": {
+    "demo": "cd ../../ && MM_CONFIG_FILE=modules/MMM-EnvCanada/demo.config.cjs node --run start:dev",
+    "demo:server": "cd ../../ && MM_CONFIG_FILE=modules/MMM-EnvCanada/demo.config.cjs node --run server",
+    "test": "node --test",
+    "check": "node --check MMM-EnvCanada.js && node --check node_helper.js && node --check forecast-service.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CharlesMorris78/MMM-EnvCanada.git"

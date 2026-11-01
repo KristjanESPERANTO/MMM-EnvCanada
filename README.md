@@ -19,10 +19,49 @@ MMM-EnvCanada is a MagicMirror² Module to display Environment Canada weather fo
 	```bash
 	git clone https://github.com/CharlesMorris78/MMM-EnvCanada.git
 	```
-3. Add the module to your MagicMirror² by copying the sample configuration below and add that to your `config.js`
+3. Add the module to your MagicMirror² by copying the sample configuration below and add that to your `config.js`. No additional npm dependencies need to be installed for this module.
 
 ### Update
-Update this module by navigating into its folder on the command line and using `git pull`
+Update this module by navigating into its folder on the command line and using `git pull`. Restart MagicMirror after updating.
+
+### Server-side Data Migration
+
+Weather, marine forecasts and air quality are now downloaded and parsed by this module's Node helper. The browser receives structured display data only; MagicMirror's `/cors` proxy is no longer used or required. Existing configuration options remain available. Restart MagicMirror after updating; no extra dependencies or Core-CORS configuration are needed for this module. Remove old `dd.weather.gc.ca` Core-CORS whitelist entries only if no other module still needs them.
+
+The helper reads each instance's configuration on the server. Client notifications cannot supply URLs, headers or replacement configuration. Requests are restricted to the HTTPS Datamart host, use a checked public DNS address for the actual connection, reject redirects, and enforce a 30-second total timeout and a 4 MiB response limit. HTTPS certificate verification remains enabled.
+
+Forecast files are selected from validated directory links rather than fixed character offsets. Marine forecasts use the latest available hourly directory today, since not every hour has a forecast. Successfully parsed weather/marine files are cached; failed requests are retried at the next update. Previous successful data remains visible on transient errors. Each instance has separate data and polling state, and server shutdown cancels requests and timers. Intervals below one second are clamped to one second.
+
+Air quality uses Datamart region codes (`atl`, `ont`, `pnr`, `pyr`, `que`), not the weather province codes. The two air quality settings were previously implemented but undocumented.
+
+Fixed interface text is maintained in `translations/en.json` and `translations/fr.json`. The helper selects the texts using each instance's `language`, independently of MagicMirror's global language. Provider text remains in the requested provider language.
+
+The runtime uses Node.js built-ins only, apart from MagicMirror's standard helper/logger APIs. Native `net.isIP` and `net.BlockList` checks reject private and reserved addresses. IPv6 requests are conservatively restricted to global unicast `2000::/3`, excluding reserved/documentation and transition ranges; IPv4-mapped and scoped IPv6 addresses are rejected. The bounded Datamart XML reader handles elements, quoted attributes, text, comments, CDATA and standard/numeric entities. DTDs, external entities, malformed structures and excessive nesting/element counts are rejected. It is not a general-purpose XML parser.
+
+### Testing
+
+```bash
+npm test
+npm run check
+```
+
+Run tests with the module inside an installed MagicMirror checkout. Template tests use Nunjucks, which MagicMirror already requires; no module-specific npm install is necessary.
+
+To run the two-instance English/French demo with the Core proxy disabled, run this from the module directory:
+
+```bash
+npm run demo
+```
+
+This starts MagicMirror in Electron development mode, like the demo scripts in other modules. For a server-only demo instead:
+
+```bash
+npm run demo:server
+```
+
+Open `http://localhost:8095` for the server-only demo. Change the demo port if it is already in use. The demo also enables marine and air quality data; these are independent configured locations.
+
+The server/helper integration has been verified with MagicMirror `2.39.0-develop` and Node.js `26.2.0`. Compatibility with older Core versions, particularly their ESM helper-loading behavior, has not been certified. The demo uses the existing desktop mirror-region layout, not a mobile layout.
 
 ## Sample Config
 Here's an example of a basic config for the module. See full list of available settings below under [Configuration](#configuration)
@@ -50,7 +89,9 @@ Here's an example of a basic config for the module. See full list of available s
 | **Setting** | **Description**|
 | --- | --- |
 | `header` | Text for the module header. If parameter is not provided, the Environment Canada location text for the configured siteCode is used.<br><br> <ul><li>**Type:** `string`</li><li>**Default:** `Environment Canada location text for the configured siteCode`</li><li>**Possible values:** `Any text string. If set to false, no header will be displayed`</li></ul> |
-| `language` | The language of the weather data and module labels: English (en) or French (fr), configured per module instance. Unsupported languages and missing translations fall back to English.<br><br> <ul><li>**Type:** `string`</li><li>**Default:** `"en"`</li><li>**Possible values:** `"en"` or `"fr"`</li></ul> |
+| `language` | The language of the weather data and module labels: English (en) or French (fr), configured per module instance. Unsupported languages fall back to English.<br><br> <ul><li>**Type:** `string`</li><li>**Default:** `"en"`</li><li>**Possible values:** `"en"` or `"fr"`</li></ul> |
+| `airQualityProv` | Datamart air-quality region: `atl`, `ont`, `pnr`, `pyr`, or `que`. Default: `""`. Required when air quality is enabled. |
+| `airQualityRegion` | Air-quality station identifier, for example `FAFFD` in `ont`. Default: `""` (disabled). Find identifiers in the region's observation/forecast XML directories at [MSC Datamart](https://dd.weather.gc.ca/today/air_quality/aqhi/). |
 | `marineEndMonth` | Final month to display the Marine Forecast.<br><br> <ul><li>**Type:** `number`</li><li>**Default:** `10`</li><li>**Possible values:** 1 through 12</li></ul> |
 | `marineLocation` | Location for Marine Forecast. If language is fr (French), must be the French language version of the location.<br><br> <ul><li>**Type:** `string`</li><li>**Default:** `""`</li><li>**Possible values:** see [Environment Canada website](https://weather.gc.ca/marine/index_e.html)</li></ul> |
 | `marineRegion` | The region for Marine Forecast. If set to empty string (the default) no Marine Forecast is displayed. Other paramters must be correct or no Marine Forecast will be displayed.<br><br> <ul><li>**Type:** `string`</li><li>**Default:** `""`</li><li>**Possible values:** `"arctic"`, `"atlantic"`, `"great_lakes"`, `"hudson"`, `"mackenzie"`, `"pacific"`, `"prairies"`, `"st_lawrence"`</li></ul> |
